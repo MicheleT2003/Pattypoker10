@@ -347,7 +347,8 @@
 
   <!-- JAVASCRIPT LOGIC -->
   <script>
-    // --- SUPABASE CONFIGURATION ---
+    
+   // --- SUPABASE & REALTIME SYNC CORRETTA ---
     const SUPABASE_URL = 'https://ylolngjygkckeflqvkqu.supabase.co';
     const SUPABASE_KEY = 'sb_publishable_PLDmLJjv6JZEFIiiIKZixg_3TEAqjcd';
 
@@ -362,6 +363,88 @@
       console.warn("Fallback locale attivo:", e);
     }
 
+    let state = {
+      players: JSON.parse(localStorage.getItem('patty_players') || '["Patty", "Dario", "Marco", "Luca"]'),
+      games: JSON.parse(localStorage.getItem('patty_games') || '[]'),
+      activeSession: JSON.parse(localStorage.getItem('patty_active_session') || 'null')
+    };
+
+    window.addEventListener('DOMContentLoaded', () => {
+      renderAll();
+      setupRealtimeSync();
+
+      if (state.activeSession && state.activeSession.isRunning) {
+        startTimerLoop();
+        document.getElementById('live-session-widget').classList.remove('hidden');
+      }
+    });
+
+    function setupRealtimeSync() {
+      if (!supabaseClient) return;
+
+      // 1. Scarica subito i dati dal cloud per la stanza MAGAZZO
+      supabaseClient
+        .from('poker_rooms')
+        .select('game_data')
+        .eq('room_code', 'MAGAZZO')
+        .maybeSingle()
+        .then(({ data, error }) => {
+          if (data && data.game_data) {
+            state = data.game_data;
+            saveLocalState();
+            renderAll();
+          } else {
+            // Se la riga non esiste, la creiamo subito
+            supabaseClient.from('poker_rooms').insert({
+              room_code: 'MAGAZZO',
+              game_data: state
+            }).then(() => console.log("Stanza MAGAZZO creata su Supabase"));
+          }
+        });
+
+      // 2. Ascolta i cambiamenti in tempo reale da altri dispositivi
+      if (realtimeChannel) supabaseClient.removeChannel(realtimeChannel);
+
+      realtimeChannel = supabaseClient
+        .channel('public:poker_rooms:MAGAZZO')
+        .on('postgres_changes', { 
+          event: '*', 
+          schema: 'public', 
+          table: 'poker_rooms', 
+          filter: 'room_code=eq.MAGAZZO' 
+        }, payload => {
+          if (payload.new && payload.new.game_data) {
+            console.log("Dati aggiornati da un altro dispositivo!");
+            state = payload.new.game_data;
+            saveLocalState();
+            renderAll();
+          }
+        })
+        .subscribe((status) => {
+          console.log("Stato connessione Realtime Supabase:", status);
+        });
+    }
+
+    function saveLocalState() {
+      localStorage.setItem('patty_players', JSON.stringify(state.players));
+      localStorage.setItem('patty_games', JSON.stringify(state.games));
+      localStorage.setItem('patty_active_session', JSON.stringify(state.activeSession));
+    }
+
+    function saveState() {
+      saveLocalState();
+      
+      if (supabaseClient) {
+        supabaseClient.from('poker_rooms').upsert({
+          room_code: 'MAGAZZO',
+          game_data: state
+        }, { onConflict: 'room_code' }).then(({ error }) => {
+          if (error) console.warn("Errore salvataggio Supabase:", error.message);
+          else console.log("Stato sincronizzato su Supabase con successo.");
+        });
+      }
+    }
+    
     // --- APPLICATION STATE ---
     let state = {
       players: JSON.parse(localStorage.getItem('patty_players') || '["Patty", "Dario", "Marco", "Luca"]'),
