@@ -617,39 +617,44 @@
     const STORAGE_KEY_SB_URL = 'patty_poker_sb_url';
     const STORAGE_KEY_SB_KEY = 'patty_poker_sb_key';
 
-// Credenziali Supabase
-    const supabase = createClient(https://ylolngjygkckeflqvkqu.supabase.co, sb_publishable_PLDmLJjv6JZEFIiiIKZixg_3TEAqjcd)
+<!-- Caricamento Libreria Supabase -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-// Salvataggio nel browser
-localStorage.setItem('CHIAVE_DI_ARCHIVIAZIONE_SB_URL', SUPABASE_URL);
-localStorage.setItem('CHIAVE_DI_ARCHIVIAZIONE_SB_KEY', SUPABASE_KEY);
+<script>
+  // Credenziali ufficiali Supabase
+  const SUPABASE_URL = 'https://ylolngjygkckeflqvkqu.supabase.co';
+  const SUPABASE_KEY = 'sb_publishable_PLDmLJjv6JZEFIiiIKZixg_3TEAqjcd';
 
-// Dichiarazione variabili stato
-let supabaseClient = null;
-let supabase = null; 
-let roomSubscription = null;
-let currentUser = null;
-let currentProfile = null;
-let isAuthModeLogin = true;
+  // Salvataggio nel LocalStorage
+  localStorage.setItem('SB_URL', SUPABASE_URL);
+  localStorage.setItem('SB_KEY', SUPABASE_KEY);
 
-// Inizializzazione del client Supabase
-function initSupabaseClient() {
-  try {
-    if (window.supabase) {
-      // Crea l'istanza con le tue credenziali
-      supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-      supabase = supabaseClient; // Riassegna senza fare let/const per evitare errori di sintassi
-      console.log("Supabase attivato con successo!");
-    } else {
-      console.error("Libreria Supabase non trovata nell'HTML.");
+  // Variabili globali di stato
+  let supabaseClient = null;
+  let supabase = null;
+  let roomSubscription = null;
+  let currentUser = null;
+  let currentProfile = null;
+  let isAuthModeLogin = true;
+
+  // Inizializzazione Client
+  function initSupabaseClient() {
+    try {
+      if (window.supabase) {
+        supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        supabase = supabaseClient;
+        console.log("Supabase attivato con successo!");
+      } else {
+        console.error("Libreria Supabase CDN non trovata nell'HTML");
+      }
+    } catch (err) {
+      console.error("Errore inizializzazione Supabase:", err);
     }
-  } catch (err) {
-    console.error("Errore di inizializzazione Supabase:", err);
   }
-}
 
-// Avvia il client
-initSupabaseClient();
+  // Avvio immediato
+  initSupabaseClient();
+</script>
 
     // Default Seed Data
     let defaultPlayers = [
