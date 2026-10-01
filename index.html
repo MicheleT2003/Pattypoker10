@@ -3,12 +3,36 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Patty Poker - Realtime League & Stats</title>
+  <title>PATTY POKER</title>
   
+  <!-- CONFIGURAZIONE PWA & ICONA HOME SCREEN -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="PATTY POKER">
+  <meta name="application-name" content="PATTY POKER">
+  <meta name="theme-color" content="#0B0F19">
+
   <!-- FAVICON & APPLICATIVE ICONS -->
-  <link rel="icon" href="icon.svg" type="image/svg+xml">
-  <link rel="alternate icon" href="icon.jpg" type="image/jpeg">
-  <link rel="apple-touch-icon" href="icon.jpg">
+  <link rel="icon" href="icon_2.jpg" type="image/jpeg">
+  <link rel="apple-touch-icon" href="icon_2.jpg">
+  <link rel="apple-touch-icon-precomposed" href="icon_2.jpg">
+
+  <!-- MANIFEST INLINE PER ANDROID -->
+  <link rel="manifest" href="data:application/manifest+json;charset=utf-8,{
+    %22short_name%22: %22PATTY POKER%22,
+    %22name%22: %22Patty Poker - Realtime League & Stats%22,
+    %22icons%22: [
+      {
+        %22src%22: %22icon_2.jpg%22,
+        %22type%22: %22image/jpeg%22,
+        %22sizes%22: %22512x512%22
+      }
+    ],
+    %22start_url%22: %22./index.html%22,
+    %22background_color%22: %22#0B0F19%22,
+    %22theme_color%22: %22#0B0F19%22,
+    %22display%22: %22standalone%22
+  }">
 
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -52,7 +76,7 @@
     <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between gap-2">
       <!-- LOGO & BRAND -->
       <div class="flex items-center gap-2.5 cursor-pointer min-w-0" onclick="switchTab('dashboard')">
-        <img src="icon.svg" onerror="this.onerror=null; this.src='icon.jpg';" alt="Patty Poker Logo" class="w-9 h-9 rounded-xl shadow-lg object-cover border border-amber-500/30 flex-shrink-0">
+        <img src="icon_2.jpg" alt="Patty Poker Logo" class="w-9 h-9 rounded-xl shadow-lg object-cover border border-amber-500/30 flex-shrink-0">
         <div class="truncate">
           <h1 class="font-bold text-base sm:text-lg leading-none text-white tracking-wide truncate">PATTY POKER</h1>
           <span class="text-[10px] sm:text-xs text-gray-400 block truncate">REALTIME LEAGUE & STATS</span>
