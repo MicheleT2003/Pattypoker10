@@ -617,32 +617,40 @@
     const STORAGE_KEY_SB_URL = 'patty_poker_sb_url';
     const STORAGE_KEY_SB_KEY = 'patty_poker_sb_key';
 
-    // Inserisci i tuoi parametri predefiniti qui o nell'interfaccia dell'app
-    let supabaseUrl = localStorage.getItem(STORAGE_KEY_SB_URL) || 'https://ylolngjygkckeflqvkqu.supabase.co';
-    let supabaseKey = localStorage.getItem(STORAGE_KEY_SB_KEY) || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlsb2xuZ2p5Z2tja2VmbHF2a3F1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA4Njk1MjQsImV4cCI6MjEwNjQ0NTUyNH0._VkaGMJO6lsGlZKG6SlRU_M0sglt8UfxGzAGJ9vMgj4';
-    let currentRoomId = localStorage.getItem(STORAGE_KEY_ROOM) || 'default-room';
+// Credenziali Supabase
+const SUPABASE_URL = 'https://ylolngjygkckeflqvkqu.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_PLDmLJjv6JZEFIiiIKZixg_3TEAqjcd';
 
-    let supabase = null;
-    let roomSubscription = null;
-    let currentUser = null;
-    let currentProfile = null;
-    let isAuthModeLogin = true;
+// Salvataggio nel browser
+localStorage.setItem('CHIAVE_DI_ARCHIVIAZIONE_SB_URL', SUPABASE_URL);
+localStorage.setItem('CHIAVE_DI_ARCHIVIAZIONE_SB_KEY', SUPABASE_KEY);
 
-    // Inizializzazione Supabase
-    function initSupabaseClient() {
-  if (supabaseUrl.includes('TUO-PROGETTO') || !supabaseUrl) {
-    console.warn("Supabase non ancora configurato con chiavi valide. Utilizzo LocalStorage.");
-    return;
-  }
+// Dichiarazione variabili stato
+let supabaseClient = null; // Usiamo 'supabaseClient' per evitare SyntaxError con la libreria
+let supabase = null; 
+let roomSubscription = null;
+let currentUser = null;
+let currentProfile = null;
+let isAuthModeLogin = true;
+
+// Inizializzazione del client Supabase
+function initSupabaseClient() {
   try {
     if (window.supabase) {
-      supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
-      console.log("Supabase attivato con successo.");
+      // Crea l'istanza con le tue credenziali
+      supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+      supabase = supabaseClient; // Riassegna senza fare let/const per evitare errori di sintassi
+      console.log("Supabase attivato con successo!");
+    } else {
+      console.error("Libreria Supabase non trovata nell'HTML.");
     }
   } catch (err) {
-    console.error("Errore inizializzazione Supabase:", err);
+    console.error("Errore di inizializzazione Supabase:", err);
   }
 }
+
+// Avvia il client
+initSupabaseClient();
 
     // Default Seed Data
     let defaultPlayers = [
