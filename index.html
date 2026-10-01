@@ -617,6 +617,8 @@
     const STORAGE_KEY_SB_URL = 'patty_poker_sb_url';
     const STORAGE_KEY_SB_KEY = 'patty_poker_sb_key';
 
+</script>
+
 <!-- Caricamento Libreria Supabase -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
@@ -629,9 +631,8 @@
   localStorage.setItem('SB_URL', SUPABASE_URL);
   localStorage.setItem('SB_KEY', SUPABASE_KEY);
 
-  // Variabili globali di stato
+  // Variabili di stato (usiamo 'supabaseClient' per evitare conflitti di nome)
   let supabaseClient = null;
-  let supabase = null;
   let roomSubscription = null;
   let currentUser = null;
   let currentProfile = null;
@@ -642,18 +643,18 @@
     try {
       if (window.supabase) {
         supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-        supabase = supabaseClient;
         console.log("Supabase attivato con successo!");
       } else {
-        console.error("Libreria Supabase CDN non trovata nell'HTML");
+        console.error("Libreria Supabase non caricata.");
       }
     } catch (err) {
       console.error("Errore inizializzazione Supabase:", err);
     }
   }
 
-  // Avvio immediato
+  // Avvio
   initSupabaseClient();
+  
 </script>
 
     // Default Seed Data
