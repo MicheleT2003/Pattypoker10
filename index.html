@@ -1,9 +1,18 @@
 <!DOCTYPE html>
 <html lang="it" class="dark">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>PATTY POKER - Texas Hold'em Tracker & Realtime League</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- Regola CSP per abilitare script, Supabase e 'unsafe-eval' -->
+  <meta http-equiv="Content-Security-Policy" content="
+    default-src 'self' 'unsafe-inline' 'unsafe-eval' https: data: blob:;
+    script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net;
+    connect-src 'self' https://*.supabase.co wss://*.supabase.co;
+    style-src 'self' 'unsafe-inline' https:;
+  ">
+
+  <title>Patty Poker App</title>
   
   <!-- PWA & Meta Tags -->
   <meta name="theme-color" content="#0b0f19" />
