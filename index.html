@@ -618,15 +618,14 @@
     const STORAGE_KEY_SB_KEY = 'patty_poker_sb_key';
 
 // Credenziali Supabase
-const SUPABASE_URL = 'https://ylolngjygkckeflqvkqu.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_PLDmLJjv6JZEFIiiIKZixg_3TEAqjcd';
+    const supabase = createClient(https://ylolngjygkckeflqvkqu.supabase.co, sb_publishable_PLDmLJjv6JZEFIiiIKZixg_3TEAqjcd)
 
 // Salvataggio nel browser
 localStorage.setItem('CHIAVE_DI_ARCHIVIAZIONE_SB_URL', SUPABASE_URL);
 localStorage.setItem('CHIAVE_DI_ARCHIVIAZIONE_SB_KEY', SUPABASE_KEY);
 
 // Dichiarazione variabili stato
-let supabaseClient = null; // Usiamo 'supabaseClient' per evitare SyntaxError con la libreria
+let supabaseClient = null;
 let supabase = null; 
 let roomSubscription = null;
 let currentUser = null;
