@@ -630,19 +630,19 @@
 
     // Inizializzazione Supabase
     function initSupabaseClient() {
-      if (supabaseUrl.includes('TUO-PROGETTO') || !supabaseUrl) {
-        console.warn("Supabase non ancora configurato con chiavi valide. Utilizzo LocalStorage.");
-        return;
-      }
-      try {
-        if (window.supabase) {
-          supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
-          console.log("Supabase attivato con successo.");
-        }
-      } catch (err) {
-        console.error("Errore inizializzazione Supabase:", err);
-      }
+  if (supabaseUrl.includes('TUO-PROGETTO') || !supabaseUrl) {
+    console.warn("Supabase non ancora configurato con chiavi valide. Utilizzo LocalStorage.");
+    return;
+  }
+  try {
+    if (window.supabase) {
+      supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+      console.log("Supabase attivato con successo.");
     }
+  } catch (err) {
+    console.error("Errore inizializzazione Supabase:", err);
+  }
+}
 
     // Default Seed Data
     let defaultPlayers = [
