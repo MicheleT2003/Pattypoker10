@@ -41,8 +41,7 @@
   </script>
   <style>
     body { background-color: #0B0F19; color: #F3F4F6; font-family: system-ui, -apple-system, sans-serif; -webkit-tap-highlight-color: transparent; }
-    .modal-backdrop { background-color: rgba(0, 0, 0, 0.8); backdrop-filter: blur(6px); }
-    /* Padding di sicurezza per schermi smartphone con notch/gesture bar */
+    .modal-backdrop { background-color: rgba(0, 0, 0, 0.85); backdrop-filter: blur(6px); }
     .pb-safe { padding-bottom: max(1rem, env(safe-area-inset-bottom)); }
   </style>
 </head>
@@ -70,11 +69,11 @@
 
       <!-- ACTION BUTTONS -->
       <div class="flex items-center gap-2 flex-shrink-0">
-        <span class="hidden sm:flex text-xs bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2.5 py-1.5 rounded-full items-center gap-1.5 font-medium">
+        <span class="hidden sm:flex text-xs bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2.5 py-1.5 rounded-full items-center gap-1.5 font-bold tracking-wider">
           <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-          DEFAULT
+          MAGAZZO
         </span>
-        <button onclick="openModal('modal-new-game')" class="bg-amber-500 hover:bg-amber-600 active:scale-95 text-black font-bold px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm transition shadow-lg flex items-center gap-1.5">
+        <button onclick="startNewGameModal()" class="bg-amber-500 hover:bg-amber-600 active:scale-95 text-black font-bold px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm transition shadow-lg flex items-center gap-1.5">
           <i data-lucide="plus-circle" class="w-4 h-4"></i>
           <span>Nuova Partita</span>
         </button>
@@ -88,11 +87,16 @@
     <!-- TAB 1: DASHBOARD -->
     <section id="tab-dashboard" class="space-y-4 sm:space-y-6">
       <!-- STAT CARDS GRID -->
-      <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
         <div class="bg-brand-card border border-brand-border p-3.5 sm:p-5 rounded-2xl">
           <p class="text-[10px] sm:text-xs font-semibold text-gray-400 uppercase tracking-wider">Partite Totali</p>
           <p id="stat-total-games" class="text-2xl sm:text-3xl font-extrabold mt-1 text-white">0</p>
           <p class="text-[10px] sm:text-xs text-gray-500 mt-0.5">Sessioni giocate</p>
+        </div>
+        <div class="bg-brand-card border border-brand-border p-3.5 sm:p-5 rounded-2xl">
+          <p class="text-[10px] sm:text-xs font-semibold text-gray-400 uppercase tracking-wider">Tempo Giocato</p>
+          <p id="stat-total-time" class="text-2xl sm:text-3xl font-extrabold mt-1 text-purple-400">0h 0m</p>
+          <p class="text-[10px] sm:text-xs text-gray-500 mt-0.5">Ore totali tavolo</p>
         </div>
         <div class="bg-brand-card border border-brand-border p-3.5 sm:p-5 rounded-2xl">
           <p class="text-[10px] sm:text-xs font-semibold text-gray-400 uppercase tracking-wider">Montepremi</p>
@@ -104,7 +108,7 @@
           <p id="stat-top-roi" class="text-2xl sm:text-3xl font-extrabold mt-1 text-emerald-400">0%</p>
           <p id="stat-top-roi-player" class="text-[10px] sm:text-xs text-gray-500 mt-0.5 truncate">-</p>
         </div>
-        <div class="bg-brand-card border border-brand-border p-3.5 sm:p-5 rounded-2xl">
+        <div class="bg-brand-card border border-brand-border p-3.5 sm:p-5 rounded-2xl col-span-2 sm:col-span-1">
           <p class="text-[10px] sm:text-xs font-semibold text-gray-400 uppercase tracking-wider">Leader Corrente</p>
           <p id="stat-leader-name" class="text-2xl sm:text-3xl font-extrabold mt-1 text-blue-400 truncate">-</p>
           <p id="stat-leader-profit" class="text-[10px] sm:text-xs text-emerald-400 mt-0.5 truncate">+€ 0.00 profitto</p>
@@ -114,19 +118,15 @@
       <!-- CHARTS SECTION -->
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
         <div class="bg-brand-card border border-brand-border p-4 sm:p-5 rounded-2xl">
-          <h3 class="text-sm sm:text-base font-bold text-white mb-3">
-            Andamento Profitto Netto (€)
-          </h3>
+          <h3 class="text-sm sm:text-base font-bold text-white mb-3">Profitto Netto Attuale (€)</h3>
           <div class="h-56 sm:h-64 relative">
             <canvas id="chartProfit"></canvas>
           </div>
         </div>
         <div class="bg-brand-card border border-brand-border p-4 sm:p-5 rounded-2xl">
-          <h3 class="text-sm sm:text-base font-bold text-white mb-3">
-            Confronto ROI (%)
-          </h3>
+          <h3 class="text-sm sm:text-base font-bold text-white mb-3">Evoluzione Cumulativa Bankroll (€)</h3>
           <div class="h-56 sm:h-64 relative">
-            <canvas id="chartRoi"></canvas>
+            <canvas id="chartHistory"></canvas>
           </div>
         </div>
       </div>
@@ -140,7 +140,7 @@
           <div>
             <span class="bg-red-500/20 text-red-400 text-[10px] sm:text-xs font-bold px-2.5 py-1 rounded-full uppercase tracking-wider animate-pulse inline-block">Sessione in Corso</span>
             <h2 class="text-xl sm:text-2xl font-bold text-white mt-1.5">Tavolo Poker Attivo</h2>
-            <p class="text-gray-400 text-xs sm:text-sm">Timer avviato. Modifica i buy-in e chiudi il tavolo a fine partita.</p>
+            <p class="text-gray-400 text-xs sm:text-sm">Timer avviato. Registra i rientri e chiudi la sessione a fine partita.</p>
           </div>
           <div class="w-full sm:w-auto text-left sm:text-right flex sm:flex-col justify-between sm:justify-center items-center sm:items-end gap-2 border-t sm:border-t-0 border-brand-border/50 pt-3 sm:pt-0">
             <div id="game-timer" class="text-3xl sm:text-4xl font-mono font-black text-amber-400 tracking-wider">00:00:00</div>
@@ -151,6 +151,7 @@
         </div>
       </div>
 
+      <!-- HISTORIC GAMES LIST -->
       <div class="bg-brand-card border border-brand-border rounded-2xl overflow-hidden">
         <div class="p-4 sm:p-5 border-b border-brand-border">
           <h3 class="font-bold text-base sm:text-lg text-white">Storico Sessioni</h3>
@@ -163,17 +164,26 @@
 
     <!-- TAB 3: GIOCATORI E AMICI -->
     <section id="tab-giocatori" class="space-y-4 sm:space-y-6 hidden">
-      <div class="bg-brand-card border border-brand-border p-4 sm:p-6 rounded-2xl">
-        <h3 class="text-base sm:text-lg font-bold text-white mb-3 sm:mb-4">Aggiungi o Collega Amico</h3>
-        <form id="form-add-player" onsubmit="handleAddPlayer(event)" class="flex flex-col sm:flex-row gap-2.5">
+      <div class="bg-brand-card border border-brand-border p-4 sm:p-6 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <form id="form-add-player" onsubmit="handleAddPlayer(event)" class="flex flex-col sm:flex-row gap-2.5 w-full sm:w-auto flex-1">
           <input type="text" id="input-player-name" placeholder="Nickname di gioco (es. Patty, Dario)" required class="flex-1 bg-brand-dark border border-brand-border rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-brand-accent">
-          <input type="email" id="input-player-email" placeholder="Email profilo (opzionale)" class="flex-1 bg-brand-dark border border-brand-border rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-brand-accent">
           <button type="submit" class="bg-brand-accent hover:bg-blue-600 active:scale-95 text-white font-bold px-5 py-2.5 rounded-xl text-sm transition">Aggiungi</button>
         </form>
+
+        <!-- BACKUP BUTTONS -->
+        <div class="flex items-center gap-2 w-full sm:w-auto border-t sm:border-t-0 border-brand-border/50 pt-3 sm:pt-0">
+          <button onclick="exportDataJSON()" class="flex-1 sm:flex-none px-3.5 py-2 rounded-xl bg-brand-dark border border-brand-border text-gray-300 hover:text-white text-xs font-semibold flex items-center justify-center gap-1.5 transition">
+            <i data-lucide="download" class="w-3.5 h-3.5"></i> Export Backup
+          </button>
+          <label class="flex-1 sm:flex-none px-3.5 py-2 rounded-xl bg-brand-dark border border-brand-border text-gray-300 hover:text-white text-xs font-semibold flex items-center justify-center gap-1.5 cursor-pointer transition">
+            <i data-lucide="upload" class="w-3.5 h-3.5"></i> Import Backup
+            <input type="file" accept=".json" onchange="importDataJSON(event)" class="hidden">
+          </label>
+        </div>
       </div>
 
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4" id="players-cards-grid">
-        <!-- Generato dinamicamente -->
+        <!-- Generato dinamicamente con tempo giocato ed eliminazione -->
       </div>
     </section>
 
@@ -228,14 +238,14 @@
     </div>
   </nav>
 
-  <!-- MODAL: NUOVA PARTITA / GESTIONE PARTITA ATTIVA -->
+  <!-- MODAL: CREAZIONE / MODIFICA SESSIONE -->
   <div id="modal-new-game" class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 modal-backdrop hidden">
     <div class="bg-brand-card border-t sm:border border-brand-border rounded-t-2xl sm:rounded-2xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden shadow-2xl">
       
       <!-- MODAL HEADER -->
       <div class="p-4 sm:p-5 border-b border-brand-border flex justify-between items-center bg-brand-dark/40">
         <div>
-          <h3 class="text-base sm:text-lg font-bold text-white">Sessione Poker</h3>
+          <h3 id="modal-title" class="text-base sm:text-lg font-bold text-white">Sessione Poker</h3>
           <p class="text-[11px] sm:text-xs text-gray-400">Totale Buy-in deve essere UGUALE a totale Cash-out.</p>
         </div>
         <button onclick="closeModal('modal-new-game')" class="text-gray-400 hover:text-white p-1 text-2xl font-bold">&times;</button>
@@ -243,6 +253,13 @@
 
       <!-- MODAL BODY -->
       <div class="p-4 sm:p-6 overflow-y-auto space-y-4 sm:space-y-6 flex-1">
+        
+        <!-- SELETTORE DATA E ORA -->
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 bg-brand-dark p-3 rounded-xl border border-brand-border">
+          <label class="text-xs text-gray-400 font-semibold">Data & Ora Sessione:</label>
+          <input type="datetime-local" id="input-session-datetime" class="bg-brand-card border border-brand-border text-white text-xs rounded-lg px-3 py-1.5 focus:outline-none focus:border-brand-accent w-full sm:w-auto">
+        </div>
+
         <!-- TIMER WIDGET -->
         <div class="bg-brand-dark border border-brand-border p-3.5 sm:p-4 rounded-xl flex items-center justify-between">
           <div>
@@ -254,10 +271,10 @@
           </button>
         </div>
 
-        <!-- LISTA GIOCATORI TAVOLO -->
+        <!-- LISTA GIOCATORI TAVOLO CON RE-BUY RAPIDI -->
         <div class="space-y-2.5">
           <label class="block text-xs sm:text-sm font-semibold text-gray-300">Partecipanti al Tavolo</label>
-          <div id="session-players-container" class="space-y-2">
+          <div id="session-players-container" class="space-y-2.5">
             <!-- Righe giocatori caricate dinamicamente -->
           </div>
           <button onclick="addPlayerRowToSession()" class="w-full py-2.5 border border-dashed border-brand-border rounded-xl text-xs sm:text-sm font-semibold text-gray-400 hover:text-white hover:border-brand-accent transition flex items-center justify-center gap-1.5 active:bg-brand-dark/50">
@@ -280,7 +297,7 @@
             <span id="val-difference" class="text-emerald-400">€ 0.00</span>
           </div>
           <p id="val-error-msg" class="text-[11px] text-red-400 font-medium hidden mt-1">
-            ⚠️ Attenzione: Il totale dei Buy-in deve essere identico al totale dei Cash-out per potersi chiudere!
+            ⚠️ Attenzione: Il totale dei Buy-in deve essere identico al totale dei Cash-out per poter salvare!
           </p>
         </div>
       </div>
@@ -295,6 +312,39 @@
     </div>
   </div>
 
+  <!-- MODAL: DETTAGLIO STATISTICHE GIOCATORE -->
+  <div id="modal-player-detail" class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop hidden">
+    <div class="bg-brand-card border border-brand-border rounded-2xl w-full max-w-md overflow-hidden shadow-2xl space-y-4 p-5 sm:p-6">
+      <div class="flex justify-between items-center border-b border-brand-border pb-3">
+        <h3 id="pdetail-name" class="text-xl font-bold text-white">Profilo Giocatore</h3>
+        <button onclick="closeModal('modal-player-detail')" class="text-gray-400 hover:text-white p-1 text-2xl font-bold">&times;</button>
+      </div>
+
+      <div class="grid grid-cols-2 gap-3">
+        <div class="bg-brand-dark p-3 rounded-xl border border-brand-border">
+          <span class="text-[10px] text-gray-400 uppercase font-semibold">Win Rate %</span>
+          <p id="pdetail-winrate" class="text-lg font-bold text-emerald-400 mt-1">0%</p>
+        </div>
+        <div class="bg-brand-dark p-3 rounded-xl border border-brand-border">
+          <span class="text-[10px] text-gray-400 uppercase font-semibold">Guadagno Orario</span>
+          <p id="pdetail-hourly" class="text-lg font-bold text-blue-400 mt-1">€ 0.00/h</p>
+        </div>
+        <div class="bg-brand-dark p-3 rounded-xl border border-brand-border">
+          <span class="text-[10px] text-gray-400 uppercase font-semibold">Miglior Vincita</span>
+          <p id="pdetail-best" class="text-lg font-bold text-emerald-400 mt-1">€ 0.00</p>
+        </div>
+        <div class="bg-brand-dark p-3 rounded-xl border border-brand-border">
+          <span class="text-[10px] text-gray-400 uppercase font-semibold">Peggior Perdita</span>
+          <p id="pdetail-worst" class="text-lg font-bold text-red-400 mt-1">€ 0.00</p>
+        </div>
+      </div>
+
+      <div class="border-t border-brand-border pt-3 text-right">
+        <button onclick="closeModal('modal-player-detail')" class="bg-brand-accent text-white px-4 py-2 rounded-xl text-xs font-bold">Chiudi</button>
+      </div>
+    </div>
+  </div>
+
   <!-- JAVASCRIPT LOGIC -->
   <script>
     // --- SUPABASE CONFIGURATION ---
@@ -302,6 +352,8 @@
     const SUPABASE_KEY = 'sb_publishable_PLDmLJjv6JZEFIiiIKZixg_3TEAqjcd';
 
     let supabaseClient = null;
+    let realtimeChannel = null;
+
     try {
       if (window.supabase) {
         supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -317,14 +369,15 @@
       activeSession: JSON.parse(localStorage.getItem('patty_active_session') || 'null')
     };
 
+    let editingGameId = null;
     let timerInterval = null;
     let chartProfitInstance = null;
-    let chartRoiInstance = null;
+    let chartHistoryInstance = null;
 
     // --- INITIALIZATION ---
     window.addEventListener('DOMContentLoaded', () => {
-      lucide.createIcons();
       renderAll();
+      setupRealtimeSync();
 
       if (state.activeSession && state.activeSession.isRunning) {
         startTimerLoop();
@@ -332,14 +385,44 @@
       }
     });
 
-    function saveState() {
+    // --- REALTIME SUPABASE SYNC ---
+    function setupRealtimeSync() {
+      if (!supabaseClient) return;
+
+      // Carica dati iniziali da Supabase
+      supabaseClient.from('poker_rooms').select('game_data').eq('room_code', 'MAGAZZO').single()
+        .then(({ data, error }) => {
+          if (data && data.game_data) {
+            state = data.game_data;
+            saveLocalState();
+            renderAll();
+          }
+        });
+
+      // Ascolta aggiornamenti in tempo reale
+      realtimeChannel = supabaseClient.channel('room-magazzo')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'poker_rooms', filter: 'room_code=eq.MAGAZZO' }, payload => {
+          if (payload.new && payload.new.game_data) {
+            state = payload.new.game_data;
+            saveLocalState();
+            renderAll();
+          }
+        })
+        .subscribe();
+    }
+
+    function saveLocalState() {
       localStorage.setItem('patty_players', JSON.stringify(state.players));
       localStorage.setItem('patty_games', JSON.stringify(state.games));
       localStorage.setItem('patty_active_session', JSON.stringify(state.activeSession));
+    }
+
+    function saveState() {
+      saveLocalState();
       
       if (supabaseClient) {
         supabaseClient.from('poker_rooms').upsert({
-          room_code: 'DEFAULT',
+          room_code: 'MAGAZZO',
           game_data: state
         }).then(({ error }) => {
           if (error) console.warn("Sync Supabase error:", error.message);
@@ -347,16 +430,28 @@
       }
     }
 
+    // --- UTILS ---
+    function formatDuration(totalSeconds) {
+      if (!totalSeconds || totalSeconds <= 0) return '0h 0m';
+      const hrs = Math.floor(totalSeconds / 3600);
+      const mins = Math.floor((totalSeconds % 3600) / 60);
+      return hrs > 0 ? `${hrs}h ${mins}m` : `${mins}m`;
+    }
+
+    function getNowDateTimeFormatted() {
+      const now = new Date();
+      now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+      return now.toISOString().slice(0, 16);
+    }
+
     // --- NAVIGATION ---
     function switchTab(tabId) {
       ['dashboard', 'partite', 'giocatori', 'classifica'].forEach(t => {
         document.getElementById(`tab-${t}`).classList.add('hidden');
         
-        // Desktop Tabs
         const btn = document.getElementById(`tab-btn-${t}`);
         if (btn) btn.className = "px-4 py-2 rounded-lg text-sm font-semibold transition text-gray-400 hover:text-white";
 
-        // Mobile Bottom Nav Tabs
         const mobBtn = document.getElementById(`mob-btn-${t}`);
         if (mobBtn) mobBtn.className = "flex flex-col items-center justify-center text-gray-400 transition";
       });
@@ -370,25 +465,32 @@
       if (activeMobBtn) activeMobBtn.className = "flex flex-col items-center justify-center text-brand-accent transition font-bold";
 
       if (tabId === 'dashboard') renderCharts();
+      lucide.createIcons();
     }
 
     function openModal(id) {
       document.getElementById(id).classList.remove('hidden');
-      if (id === 'modal-new-game') {
-        initSessionModal();
-      }
+      lucide.createIcons();
     }
 
     function closeModal(id) {
       document.getElementById(id).classList.add('hidden');
     }
 
-    // --- SESSION & TIMER LOGIC ---
+    // --- SESSION & TIMER LOGIC (RESILIENTE AL STAND-BY) ---
+    function startNewGameModal() {
+      editingGameId = null;
+      document.getElementById('modal-title').textContent = "Nuova Sessione Poker";
+      document.getElementById('input-session-datetime').value = getNowDateTimeFormatted();
+      initSessionModal();
+      openModal('modal-new-game');
+    }
+
     function initSessionModal() {
-      if (!state.activeSession) {
+      if (!editingGameId && !state.activeSession) {
         state.activeSession = {
           startTime: Date.now(),
-          elapsedSeconds: 0,
+          pausedDuration: 0,
           isRunning: false,
           players: [
             { name: state.players[0] || 'Giocatore 1', buyIn: 20, cashOut: 20 },
@@ -401,22 +503,45 @@
       updateTimerDisplay();
     }
 
+    function editGame(gameId) {
+      const game = state.games.find(g => g.id === gameId);
+      if (!game) return;
+
+      editingGameId = gameId;
+      document.getElementById('modal-title').textContent = `Modifica Sessione del ${game.date}`;
+      document.getElementById('input-session-datetime').value = game.rawIsoDate || getNowDateTimeFormatted();
+
+      state.activeSession = {
+        startTime: Date.now() - ((game.durationSeconds || 0) * 1000),
+        pausedDuration: (game.durationSeconds || 0),
+        isRunning: false,
+        players: JSON.parse(JSON.stringify(game.players))
+      };
+
+      initSessionModal();
+      openModal('modal-new-game');
+    }
+
     function toggleTimer() {
       if (!state.activeSession) return;
       
-      state.activeSession.isRunning = !state.activeSession.isRunning;
-      const btn = document.getElementById('btn-timer-start');
-
-      if (state.activeSession.isRunning) {
-        btn.textContent = "Pausa Timer";
-        btn.className = "bg-amber-500/20 text-amber-400 border border-amber-500/30 px-3 py-2 rounded-xl text-xs font-bold";
+      if (!state.activeSession.isRunning) {
+        state.activeSession.isRunning = true;
+        state.activeSession.startTime = Date.now() - ((state.activeSession.pausedDuration || 0) * 1000);
         startTimerLoop();
         document.getElementById('live-session-widget').classList.remove('hidden');
       } else {
-        btn.textContent = "Riprendi Timer";
-        btn.className = "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-3 py-2 rounded-xl text-xs font-bold";
+        state.activeSession.isRunning = false;
+        state.activeSession.pausedDuration = Math.floor((Date.now() - state.activeSession.startTime) / 1000);
         clearInterval(timerInterval);
       }
+
+      const btn = document.getElementById('btn-timer-start');
+      btn.textContent = state.activeSession.isRunning ? "Pausa Timer" : "Riprendi Timer";
+      btn.className = state.activeSession.isRunning 
+        ? "bg-amber-500/20 text-amber-400 border border-amber-500/30 px-3 py-2 rounded-xl text-xs font-bold"
+        : "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-3 py-2 rounded-xl text-xs font-bold";
+
       saveState();
     }
 
@@ -424,15 +549,21 @@
       clearInterval(timerInterval);
       timerInterval = setInterval(() => {
         if (state.activeSession && state.activeSession.isRunning) {
-          state.activeSession.elapsedSeconds++;
           updateTimerDisplay();
-          if (state.activeSession.elapsedSeconds % 5 === 0) saveState();
         }
       }, 1000);
     }
 
+    function getCurrentElapsedSeconds() {
+      if (!state.activeSession) return 0;
+      if (state.activeSession.isRunning) {
+        return Math.floor((Date.now() - state.activeSession.startTime) / 1000);
+      }
+      return state.activeSession.pausedDuration || 0;
+    }
+
     function updateTimerDisplay() {
-      const secs = state.activeSession ? state.activeSession.elapsedSeconds : 0;
+      const secs = getCurrentElapsedSeconds();
       const hrs = Math.floor(secs / 3600).toString().padStart(2, '0');
       const mins = Math.floor((secs % 3600) / 60).toString().padStart(2, '0');
       const s = (secs % 60).toString().padStart(2, '0');
@@ -448,27 +579,42 @@
 
       state.activeSession.players.forEach((p, idx) => {
         const row = document.createElement('div');
-        row.className = "grid grid-cols-12 gap-1.5 items-center bg-brand-dark p-2 rounded-xl border border-brand-border";
+        row.className = "bg-brand-dark p-2.5 rounded-xl border border-brand-border space-y-2";
         row.innerHTML = `
-          <div class="col-span-5 sm:col-span-5">
-            <select onchange="updatePlayerSessionName(${idx}, this.value)" class="w-full bg-brand-card border border-brand-border rounded-lg px-2 py-1.5 text-xs sm:text-sm text-white focus:outline-none">
-              ${state.players.map(name => `<option value="${name}" ${name === p.name ? 'selected' : ''}>${name}</option>`).join('')}
-            </select>
+          <div class="grid grid-cols-12 gap-1.5 items-center">
+            <div class="col-span-5">
+              <select onchange="updatePlayerSessionName(${idx}, this.value)" class="w-full bg-brand-card border border-brand-border rounded-lg px-2 py-1.5 text-xs text-white focus:outline-none">
+                ${state.players.map(name => `<option value="${name}" ${name === p.name ? 'selected' : ''}>${name}</option>`).join('')}
+              </select>
+            </div>
+            <div class="col-span-3 flex items-center gap-1">
+              <span class="text-[10px] text-gray-500">In:</span>
+              <input type="number" min="0" step="1" value="${p.buyIn}" onchange="updatePlayerSessionValue(${idx}, 'buyIn', this.value)" class="w-full bg-brand-card border border-brand-border rounded-lg px-1.5 py-1 text-xs font-bold text-amber-400 text-center">
+            </div>
+            <div class="col-span-3 flex items-center gap-1">
+              <span class="text-[10px] text-gray-500">Out:</span>
+              <input type="number" min="0" step="1" value="${p.cashOut}" onchange="updatePlayerSessionValue(${idx}, 'cashOut', this.value)" class="w-full bg-brand-card border border-brand-border rounded-lg px-1.5 py-1 text-xs font-bold text-emerald-400 text-center">
+            </div>
+            <div class="col-span-1 text-center">
+              <button onclick="removePlayerFromSession(${idx})" class="text-red-400 hover:text-red-300 font-bold p-1 text-base">&times;</button>
+            </div>
           </div>
-          <div class="col-span-3 sm:col-span-3 flex items-center gap-1">
-            <span class="text-[10px] text-gray-500">In:</span>
-            <input type="number" min="0" step="1" value="${p.buyIn}" onchange="updatePlayerSessionValue(${idx}, 'buyIn', this.value)" class="w-full bg-brand-card border border-brand-border rounded-lg px-1.5 py-1 text-xs sm:text-sm font-bold text-amber-400 text-center">
-          </div>
-          <div class="col-span-3 sm:col-span-3 flex items-center gap-1">
-            <span class="text-[10px] text-gray-500">Out:</span>
-            <input type="number" min="0" step="1" value="${p.cashOut}" onchange="updatePlayerSessionValue(${idx}, 'cashOut', this.value)" class="w-full bg-brand-card border border-brand-border rounded-lg px-1.5 py-1 text-xs sm:text-sm font-bold text-emerald-400 text-center">
-          </div>
-          <div class="col-span-1 text-center">
-            <button onclick="removePlayerFromSession(${idx})" class="text-red-400 hover:text-red-300 font-bold p-1 text-base">&times;</button>
+          <!-- PULSANTI RE-BUY RAPIDI -->
+          <div class="flex items-center gap-1.5 pt-1 border-t border-brand-border/40 text-[10px]">
+            <span class="text-gray-500 font-medium">Re-buy rapido:</span>
+            <button onclick="quickAddBuyIn(${idx}, 10)" class="px-2 py-0.5 bg-amber-500/10 text-amber-400 border border-amber-500/20 rounded-md font-bold hover:bg-amber-500/20">+10€</button>
+            <button onclick="quickAddBuyIn(${idx}, 20)" class="px-2 py-0.5 bg-amber-500/10 text-amber-400 border border-amber-500/20 rounded-md font-bold hover:bg-amber-500/20">+20€</button>
+            <button onclick="quickAddBuyIn(${idx}, 50)" class="px-2 py-0.5 bg-amber-500/10 text-amber-400 border border-amber-500/20 rounded-md font-bold hover:bg-amber-500/20">+50€</button>
           </div>
         `;
         container.appendChild(row);
       });
+    }
+
+    function quickAddBuyIn(idx, amount) {
+      state.activeSession.players[idx].buyIn = (parseFloat(state.activeSession.players[idx].buyIn) || 0) + amount;
+      renderSessionModalRows();
+      updateBalanceValidation();
     }
 
     function addPlayerRowToSession() {
@@ -529,26 +675,49 @@
       const totalCashOut = state.activeSession.players.reduce((sum, p) => sum + p.cashOut, 0);
 
       if (Math.abs(totalCashOut - totalBuyIn) >= 0.01) {
-        alert("Impossibile chiudere la sessione: I saldi non coincidono!");
+        alert("Impossibile salvare la sessione: I saldi non coincidono!");
         return;
       }
 
       clearInterval(timerInterval);
 
-      const completedGame = {
-        id: Date.now(),
-        date: new Date().toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
-        durationSeconds: state.activeSession.elapsedSeconds,
-        totalPrize: totalBuyIn,
-        players: state.activeSession.players.map(p => ({
-          name: p.name,
-          buyIn: p.buyIn,
-          cashOut: p.cashOut,
-          profit: p.cashOut - p.buyIn
-        }))
-      };
+      const rawDateTime = document.getElementById('input-session-datetime').value;
+      const formattedDate = rawDateTime ? new Date(rawDateTime).toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : new Date().toLocaleDateString('it-IT');
 
-      state.games.unshift(completedGame);
+      const elapsed = getCurrentElapsedSeconds();
+
+      if (editingGameId) {
+        const index = state.games.findIndex(g => g.id === editingGameId);
+        if (index !== -1) {
+          state.games[index].rawIsoDate = rawDateTime;
+          state.games[index].date = formattedDate;
+          state.games[index].durationSeconds = elapsed;
+          state.games[index].totalPrize = totalBuyIn;
+          state.games[index].players = state.activeSession.players.map(p => ({
+            name: p.name,
+            buyIn: p.buyIn,
+            cashOut: p.cashOut,
+            profit: p.cashOut - p.buyIn
+          }));
+        }
+        editingGameId = null;
+      } else {
+        const completedGame = {
+          id: Date.now(),
+          rawIsoDate: rawDateTime,
+          date: formattedDate,
+          durationSeconds: elapsed,
+          totalPrize: totalBuyIn,
+          players: state.activeSession.players.map(p => ({
+            name: p.name,
+            buyIn: p.buyIn,
+            cashOut: p.cashOut,
+            profit: p.cashOut - p.buyIn
+          }))
+        };
+        state.games.unshift(completedGame);
+      }
+
       state.activeSession = null;
 
       saveState();
@@ -562,7 +731,15 @@
       openModal('modal-new-game');
     }
 
-    // --- PLAYERS MANAGEMENT ---
+    function deleteGame(gameId) {
+      if (confirm("Sei sicuro di voler eliminare questa partita? La classifica verrà ricalcolata.")) {
+        state.games = state.games.filter(g => g.id !== gameId);
+        saveState();
+        renderAll();
+      }
+    }
+
+    // --- PLAYERS MANAGEMENT & DETAILS ---
     function handleAddPlayer(e) {
       e.preventDefault();
       const nameInput = document.getElementById('input-player-name');
@@ -576,6 +753,58 @@
       }
     }
 
+    function deletePlayer(playerName) {
+      if (confirm(`Sei sicuro di voler eliminare il giocatore "${playerName}"?`)) {
+        state.players = state.players.filter(p => p !== playerName);
+        saveState();
+        renderAll();
+      }
+    }
+
+    function openPlayerDetail(playerName) {
+      const stats = computeStats()[playerName];
+      if (!stats) return;
+
+      document.getElementById('pdetail-name').textContent = playerName;
+      document.getElementById('pdetail-winrate').textContent = `${stats.winRate.toFixed(1)}%`;
+      document.getElementById('pdetail-hourly').textContent = `€ ${stats.hourlyRate.toFixed(2)}/h`;
+      document.getElementById('pdetail-best').textContent = `+€ ${stats.bestWin.toFixed(2)}`;
+      document.getElementById('pdetail-worst').textContent = `€ ${stats.worstLoss.toFixed(2)}`;
+
+      openModal('modal-player-detail');
+    }
+
+    // --- BACKUP EXPORT & IMPORT ---
+    function exportDataJSON() {
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state, null, 2));
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.setAttribute("href", dataStr);
+      downloadAnchor.setAttribute("download", `patty_poker_backup_${new Date().toISOString().slice(0,10)}.json`);
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+    }
+
+    function importDataJSON(event) {
+      const fileReader = new FileReader();
+      fileReader.onload = function(e) {
+        try {
+          const importedState = JSON.parse(e.target.result);
+          if (importedState.players && importedState.games) {
+            state = importedState;
+            saveState();
+            renderAll();
+            alert("Backup ripristinato con successo!");
+          } else {
+            alert("File di backup non valido.");
+          }
+        } catch (err) {
+          alert("Errore nella lettura del file JSON.");
+        }
+      };
+      fileReader.readAsText(event.target.files[0]);
+    }
+
     // --- RENDER FUNCTIONS ---
     function renderAll() {
       renderDashboardStats();
@@ -583,29 +812,41 @@
       renderPlayersGrid();
       renderLeaderboardTable();
       renderCharts();
+      lucide.createIcons();
     }
 
     function computeStats() {
       const stats = {};
       state.players.forEach(p => {
-        stats[p] = { games: 0, buyIn: 0, cashOut: 0, profit: 0, roi: 0 };
+        stats[p] = { games: 0, wins: 0, buyIn: 0, cashOut: 0, profit: 0, roi: 0, totalTime: 0, bestWin: 0, worstLoss: 0, winRate: 0, hourlyRate: 0 };
       });
 
       state.games.forEach(g => {
         g.players.forEach(p => {
           if (!stats[p.name]) {
-            stats[p.name] = { games: 0, buyIn: 0, cashOut: 0, profit: 0, roi: 0 };
+            stats[p.name] = { games: 0, wins: 0, buyIn: 0, cashOut: 0, profit: 0, roi: 0, totalTime: 0, bestWin: 0, worstLoss: 0, winRate: 0, hourlyRate: 0 };
           }
           stats[p.name].games++;
           stats[p.name].buyIn += p.buyIn;
           stats[p.name].cashOut += p.cashOut;
           stats[p.name].profit += p.profit;
+          stats[p.name].totalTime += (g.durationSeconds || 0);
+
+          if (p.profit > 0) stats[p.name].wins++;
+          if (p.profit > stats[p.name].bestWin) stats[p.name].bestWin = p.profit;
+          if (p.profit < stats[p.name].worstLoss) stats[p.name].worstLoss = p.profit;
         });
       });
 
       Object.keys(stats).forEach(p => {
         if (stats[p].buyIn > 0) {
           stats[p].roi = (stats[p].profit / stats[p].buyIn) * 100;
+        }
+        if (stats[p].games > 0) {
+          stats[p].winRate = (stats[p].wins / stats[p].games) * 100;
+        }
+        if (stats[p].totalTime > 0) {
+          stats[p].hourlyRate = (stats[p].profit / (stats[p].totalTime / 3600));
         }
       });
 
@@ -616,8 +857,10 @@
       const stats = computeStats();
       const totalGames = state.games.length;
       const totalPrize = state.games.reduce((acc, g) => acc + g.totalPrize, 0);
+      const totalOverallSeconds = state.games.reduce((acc, g) => acc + (g.durationSeconds || 0), 0);
 
       document.getElementById('stat-total-games').textContent = totalGames;
+      document.getElementById('stat-total-time').textContent = formatDuration(totalOverallSeconds);
       document.getElementById('stat-total-prize').textContent = `€ ${totalPrize.toFixed(2)}`;
 
       let topRoiPlayer = '-';
@@ -650,9 +893,7 @@
       }
 
       list.innerHTML = state.games.map(g => {
-        const hrs = Math.floor(g.durationSeconds / 3600);
-        const mins = Math.floor((g.durationSeconds % 3600) / 60);
-        const durationStr = `${hrs > 0 ? hrs + 'h ' : ''}${mins}m`;
+        const durationStr = formatDuration(g.durationSeconds);
 
         return `
           <div class="p-4 sm:p-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
@@ -669,9 +910,19 @@
                 `).join('')}
               </div>
             </div>
-            <div class="text-left sm:text-right border-t sm:border-t-0 border-brand-border/50 pt-2 sm:pt-0 w-full sm:w-auto flex justify-between sm:block">
-              <span class="text-[10px] text-gray-400 uppercase tracking-wider block">Montepremi</span>
-              <div class="font-black text-amber-400 text-base sm:text-lg">€ ${g.totalPrize.toFixed(2)}</div>
+            <div class="text-left sm:text-right border-t sm:border-t-0 border-brand-border/50 pt-2 sm:pt-0 w-full sm:w-auto flex sm:flex-col justify-between items-center sm:items-end gap-2">
+              <div>
+                <span class="text-[10px] text-gray-400 uppercase tracking-wider block">Montepremi</span>
+                <div class="font-black text-amber-400 text-base sm:text-lg">€ ${g.totalPrize.toFixed(2)}</div>
+              </div>
+              <div class="flex items-center gap-2">
+                <button onclick="editGame(${g.id})" class="px-2.5 py-1 rounded-lg bg-blue-500/10 text-blue-400 border border-blue-500/20 hover:bg-blue-500/20 text-xs font-semibold flex items-center gap-1 transition">
+                  <i data-lucide="edit-3" class="w-3.5 h-3.5"></i> Modifica
+                </button>
+                <button onclick="deleteGame(${g.id})" class="px-2.5 py-1 rounded-lg bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500/20 text-xs font-semibold flex items-center gap-1 transition">
+                  <i data-lucide="trash-2" class="w-3.5 h-3.5"></i> Elimina
+                </button>
+              </div>
             </div>
           </div>
         `;
@@ -683,18 +934,23 @@
       const stats = computeStats();
 
       grid.innerHTML = state.players.map(p => {
-        const s = stats[p] || { games: 0, profit: 0, roi: 0 };
+        const s = stats[p] || { games: 0, profit: 0, roi: 0, totalTime: 0 };
         return `
-          <div class="bg-brand-card border border-brand-border p-4 rounded-2xl flex justify-between items-center">
+          <div class="bg-brand-card border border-brand-border p-4 rounded-2xl flex justify-between items-center cursor-pointer hover:border-brand-accent transition" onclick="openPlayerDetail('${p}')">
             <div>
-              <h4 class="font-bold text-base text-white">${p}</h4>
-              <p class="text-xs text-gray-400">${s.games} sessioni</p>
+              <h4 class="font-bold text-base text-white flex items-center gap-1.5">${p} <i data-lucide="chevron-right" class="w-4 h-4 text-gray-500"></i></h4>
+              <p class="text-xs text-gray-400">${s.games} sessioni • ⏱️ ${formatDuration(s.totalTime)}</p>
             </div>
-            <div class="text-right">
-              <div class="font-extrabold text-sm sm:text-base ${s.profit >= 0 ? 'text-emerald-400' : 'text-red-400'}">
-                ${s.profit >= 0 ? '+' : ''}€ ${s.profit.toFixed(2)}
+            <div class="flex items-center gap-3" onclick="event.stopPropagation()">
+              <div class="text-right">
+                <div class="font-extrabold text-sm sm:text-base ${s.profit >= 0 ? 'text-emerald-400' : 'text-red-400'}">
+                  ${s.profit >= 0 ? '+' : ''}€ ${s.profit.toFixed(2)}
+                </div>
+                <p class="text-[10px] sm:text-xs text-gray-500">ROI: ${s.roi.toFixed(1)}%</p>
               </div>
-              <p class="text-[10px] sm:text-xs text-gray-500">ROI: ${s.roi.toFixed(1)}%</p>
+              <button onclick="deletePlayer('${p}')" class="text-gray-500 hover:text-red-400 p-1.5 rounded-lg hover:bg-red-500/10 transition" title="Elimina Giocatore">
+                <i data-lucide="trash-2" class="w-4 h-4"></i>
+              </button>
             </div>
           </div>
         `;
@@ -728,9 +984,8 @@
       const stats = computeStats();
       const labels = Object.keys(stats);
       const profitData = labels.map(p => stats[p].profit);
-      const roiData = labels.map(p => stats[p].roi);
 
-      // Profit Chart
+      // Profit Bar Chart
       const ctxProfit = document.getElementById('chartProfit').getContext('2d');
       if (chartProfitInstance) chartProfitInstance.destroy();
       chartProfitInstance = new Chart(ctxProfit, {
@@ -755,24 +1010,41 @@
         }
       });
 
-      // ROI Chart
-      const ctxRoi = document.getElementById('chartRoi').getContext('2d');
-      if (chartRoiInstance) chartRoiInstance.destroy();
-      chartRoiInstance = new Chart(ctxRoi, {
-        type: 'bar',
+      // Cumulative Bankroll Line Chart
+      const ctxHistory = document.getElementById('chartHistory').getContext('2d');
+      if (chartHistoryInstance) chartHistoryInstance.destroy();
+
+      const reversedGames = [...state.games].reverse();
+      const gameLabels = reversedGames.map((g, i) => `P${i+1}`);
+      const colors = ['#3B82F6', '#F59E0B', '#10B981', '#EC4899', '#8B5CF6', '#6366F1'];
+
+      const datasets = state.players.map((player, pIdx) => {
+        let cumulative = 0;
+        const data = reversedGames.map(g => {
+          const p = g.players.find(gp => gp.name === player);
+          if (p) cumulative += p.profit;
+          return cumulative;
+        });
+
+        return {
+          label: player,
+          data: data,
+          borderColor: colors[pIdx % colors.length],
+          tension: 0.2,
+          fill: false
+        };
+      });
+
+      chartHistoryInstance = new Chart(ctxHistory, {
+        type: 'line',
         data: {
-          labels: labels,
-          datasets: [{
-            label: 'ROI (%)',
-            data: roiData,
-            backgroundColor: '#3B82F6',
-            borderRadius: 6
-          }]
+          labels: gameLabels.length ? gameLabels : ['Inizio'],
+          datasets: datasets
         },
         options: {
           responsive: true,
           maintainAspectRatio: false,
-          plugins: { legend: { display: false } },
+          plugins: { legend: { labels: { color: '#9CA3AF', font: { size: 10 } } } },
           scales: {
             y: { ticks: { color: '#9CA3AF', font: { size: 10 } }, grid: { color: '#1F2937' } },
             x: { ticks: { color: '#9CA3AF', font: { size: 10 } }, grid: { display: false } }
