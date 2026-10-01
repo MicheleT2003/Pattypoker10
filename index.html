@@ -347,8 +347,7 @@
 
   <!-- JAVASCRIPT LOGIC -->
   <script>
-    
-   // --- SUPABASE & REALTIME SYNC CORRETTA ---
+    // --- SUPABASE & REALTIME SYNC CORRETTA ---
     const SUPABASE_URL = 'https://ylolngjygkckeflqvkqu.supabase.co';
     const SUPABASE_KEY = 'sb_publishable_PLDmLJjv6JZEFIiiIKZixg_3TEAqjcd';
 
@@ -363,12 +362,19 @@
       console.warn("Fallback locale attivo:", e);
     }
 
+    // --- APPLICATION STATE ---
     let state = {
       players: JSON.parse(localStorage.getItem('patty_players') || '["Patty", "Dario", "Marco", "Luca"]'),
       games: JSON.parse(localStorage.getItem('patty_games') || '[]'),
       activeSession: JSON.parse(localStorage.getItem('patty_active_session') || 'null')
     };
 
+    let editingGameId = null;
+    let timerInterval = null;
+    let chartProfitInstance = null;
+    let chartHistoryInstance = null;
+
+    // --- INITIALIZATION ---
     window.addEventListener('DOMContentLoaded', () => {
       renderAll();
       setupRealtimeSync();
@@ -379,6 +385,7 @@
       }
     });
 
+    // --- REALTIME SUPABASE SYNC ---
     function setupRealtimeSync() {
       if (!supabaseClient) return;
 
@@ -441,74 +448,6 @@
         }, { onConflict: 'room_code' }).then(({ error }) => {
           if (error) console.warn("Errore salvataggio Supabase:", error.message);
           else console.log("Stato sincronizzato su Supabase con successo.");
-        });
-      }
-    }
-    
-    // --- APPLICATION STATE ---
-    let state = {
-      players: JSON.parse(localStorage.getItem('patty_players') || '["Patty", "Dario", "Marco", "Luca"]'),
-      games: JSON.parse(localStorage.getItem('patty_games') || '[]'),
-      activeSession: JSON.parse(localStorage.getItem('patty_active_session') || 'null')
-    };
-
-    let editingGameId = null;
-    let timerInterval = null;
-    let chartProfitInstance = null;
-    let chartHistoryInstance = null;
-
-    // --- INITIALIZATION ---
-    window.addEventListener('DOMContentLoaded', () => {
-      renderAll();
-      setupRealtimeSync();
-
-      if (state.activeSession && state.activeSession.isRunning) {
-        startTimerLoop();
-        document.getElementById('live-session-widget').classList.remove('hidden');
-      }
-    });
-
-    // --- REALTIME SUPABASE SYNC ---
-    function setupRealtimeSync() {
-      if (!supabaseClient) return;
-
-      // Carica dati iniziali da Supabase
-      supabaseClient.from('poker_rooms').select('game_data').eq('room_code', 'MAGAZZO').single()
-        .then(({ data, error }) => {
-          if (data && data.game_data) {
-            state = data.game_data;
-            saveLocalState();
-            renderAll();
-          }
-        });
-
-      // Ascolta aggiornamenti in tempo reale
-      realtimeChannel = supabaseClient.channel('room-magazzo')
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'poker_rooms', filter: 'room_code=eq.MAGAZZO' }, payload => {
-          if (payload.new && payload.new.game_data) {
-            state = payload.new.game_data;
-            saveLocalState();
-            renderAll();
-          }
-        })
-        .subscribe();
-    }
-
-    function saveLocalState() {
-      localStorage.setItem('patty_players', JSON.stringify(state.players));
-      localStorage.setItem('patty_games', JSON.stringify(state.games));
-      localStorage.setItem('patty_active_session', JSON.stringify(state.activeSession));
-    }
-
-    function saveState() {
-      saveLocalState();
-      
-      if (supabaseClient) {
-        supabaseClient.from('poker_rooms').upsert({
-          room_code: 'MAGAZZO',
-          game_data: state
-        }).then(({ error }) => {
-          if (error) console.warn("Sync Supabase error:", error.message);
         });
       }
     }
@@ -698,6 +637,7 @@
       state.activeSession.players[idx].buyIn = (parseFloat(state.activeSession.players[idx].buyIn) || 0) + amount;
       renderSessionModalRows();
       updateBalanceValidation();
+      saveState();
     }
 
     function addPlayerRowToSession() {
@@ -719,11 +659,13 @@
 
     function updatePlayerSessionName(idx, name) {
       state.activeSession.players[idx].name = name;
+      saveState();
     }
 
     function updatePlayerSessionValue(idx, field, val) {
       state.activeSession.players[idx][field] = parseFloat(val) || 0;
       updateBalanceValidation();
+      saveState();
     }
 
     function updateBalanceValidation() {
