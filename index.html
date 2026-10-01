@@ -2,7 +2,7 @@
 <html lang="it" class="dark">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Patty Poker - Realtime League & Stats</title>
   
   <!-- FAVICON & APPLICATIVE ICONS -->
@@ -40,25 +40,27 @@
     }
   </script>
   <style>
-    body { background-color: #0B0F19; color: #F3F4F6; font-family: system-ui, -apple-system, sans-serif; }
-    .modal-backdrop { background-color: rgba(0, 0, 0, 0.75); backdrop-filter: blur(4px); }
+    body { background-color: #0B0F19; color: #F3F4F6; font-family: system-ui, -apple-system, sans-serif; -webkit-tap-highlight-color: transparent; }
+    .modal-backdrop { background-color: rgba(0, 0, 0, 0.8); backdrop-filter: blur(6px); }
+    /* Padding di sicurezza per schermi smartphone con notch/gesture bar */
+    .pb-safe { padding-bottom: max(1rem, env(safe-area-inset-bottom)); }
   </style>
 </head>
-<body class="min-h-screen flex flex-col">
+<body class="min-h-screen flex flex-col pb-20 md:pb-0">
 
-  <!-- NAVBAR -->
-  <header class="border-b border-brand-border bg-brand-card/80 sticky top-0 z-40 backdrop-blur">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-      <div class="flex items-center gap-3 cursor-pointer" onclick="switchTab('dashboard')">
-        <!-- ICONA LOGO PATTY POKER -->
-        <img src="icon.svg" onerror="this.onerror=null; this.src='icon.jpg';" alt="Patty Poker Logo" class="w-10 h-10 rounded-xl shadow-lg object-cover border border-amber-500/30">
-        <div>
-          <h1 class="font-bold text-lg leading-none text-white tracking-wide">PATTY POKER</h1>
-          <span class="text-xs text-gray-400">REALTIME LEAGUE & STATS</span>
+  <!-- HEADER NAVBAR -->
+  <header class="border-b border-brand-border bg-brand-card/90 sticky top-0 z-30 backdrop-blur">
+    <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between gap-2">
+      <!-- LOGO & BRAND -->
+      <div class="flex items-center gap-2.5 cursor-pointer min-w-0" onclick="switchTab('dashboard')">
+        <img src="icon.svg" onerror="this.onerror=null; this.src='icon.jpg';" alt="Patty Poker Logo" class="w-9 h-9 rounded-xl shadow-lg object-cover border border-amber-500/30 flex-shrink-0">
+        <div class="truncate">
+          <h1 class="font-bold text-base sm:text-lg leading-none text-white tracking-wide truncate">PATTY POKER</h1>
+          <span class="text-[10px] sm:text-xs text-gray-400 block truncate">REALTIME LEAGUE & STATS</span>
         </div>
       </div>
 
-      <!-- NAVIGATION TABS -->
+      <!-- DESKTOP NAVIGATION TABS -->
       <nav class="hidden md:flex space-x-1 bg-brand-dark/50 p-1 rounded-xl border border-brand-border">
         <button id="tab-btn-dashboard" onclick="switchTab('dashboard')" class="px-4 py-2 rounded-lg text-sm font-semibold transition bg-brand-accent text-white">Dashboard</button>
         <button id="tab-btn-partite" onclick="switchTab('partite')" class="px-4 py-2 rounded-lg text-sm font-semibold transition text-gray-400 hover:text-white">Partite</button>
@@ -67,62 +69,63 @@
       </nav>
 
       <!-- ACTION BUTTONS -->
-      <div class="flex items-center gap-3">
-        <span class="text-xs bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-3 py-1.5 rounded-full flex items-center gap-1.5 font-medium">
+      <div class="flex items-center gap-2 flex-shrink-0">
+        <span class="hidden sm:flex text-xs bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2.5 py-1.5 rounded-full items-center gap-1.5 font-medium">
           <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-          Stanza: DEFAULT
+          DEFAULT
         </span>
-        <button onclick="openModal('modal-new-game')" class="bg-amber-500 hover:bg-amber-600 text-black font-bold px-4 py-2 rounded-xl text-sm transition shadow-lg flex items-center gap-2">
-          <i data-lucide="plus-circle" class="w-4 h-4"></i> Nuova Partita
+        <button onclick="openModal('modal-new-game')" class="bg-amber-500 hover:bg-amber-600 active:scale-95 text-black font-bold px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm transition shadow-lg flex items-center gap-1.5">
+          <i data-lucide="plus-circle" class="w-4 h-4"></i>
+          <span>Nuova Partita</span>
         </button>
       </div>
     </div>
   </header>
 
   <!-- MAIN CONTAINER -->
-  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+  <main class="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6 space-y-6">
 
     <!-- TAB 1: DASHBOARD -->
-    <section id="tab-dashboard" class="space-y-6">
-      <!-- STAT CARDS -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div class="bg-brand-card border border-brand-border p-5 rounded-2xl">
-          <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Partite Totali</p>
-          <p id="stat-total-games" class="text-3xl font-extrabold mt-1 text-white">0</p>
-          <p class="text-xs text-gray-500 mt-1">Sessioni registrate</p>
+    <section id="tab-dashboard" class="space-y-4 sm:space-y-6">
+      <!-- STAT CARDS GRID -->
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        <div class="bg-brand-card border border-brand-border p-3.5 sm:p-5 rounded-2xl">
+          <p class="text-[10px] sm:text-xs font-semibold text-gray-400 uppercase tracking-wider">Partite Totali</p>
+          <p id="stat-total-games" class="text-2xl sm:text-3xl font-extrabold mt-1 text-white">0</p>
+          <p class="text-[10px] sm:text-xs text-gray-500 mt-0.5">Sessioni giocate</p>
         </div>
-        <div class="bg-brand-card border border-brand-border p-5 rounded-2xl">
-          <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Montepremi Totale</p>
-          <p id="stat-total-prize" class="text-3xl font-extrabold mt-1 text-amber-400">€ 0.00</p>
-          <p class="text-xs text-gray-500 mt-1">Movimento Buy-in</p>
+        <div class="bg-brand-card border border-brand-border p-3.5 sm:p-5 rounded-2xl">
+          <p class="text-[10px] sm:text-xs font-semibold text-gray-400 uppercase tracking-wider">Montepremi</p>
+          <p id="stat-total-prize" class="text-2xl sm:text-3xl font-extrabold mt-1 text-amber-400">€ 0.00</p>
+          <p class="text-[10px] sm:text-xs text-gray-500 mt-0.5">Totale Buy-in</p>
         </div>
-        <div class="bg-brand-card border border-brand-border p-5 rounded-2xl">
-          <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Top ROI Lega</p>
-          <p id="stat-top-roi" class="text-3xl font-extrabold mt-1 text-emerald-400">0%</p>
-          <p id="stat-top-roi-player" class="text-xs text-gray-500 mt-1">-</p>
+        <div class="bg-brand-card border border-brand-border p-3.5 sm:p-5 rounded-2xl">
+          <p class="text-[10px] sm:text-xs font-semibold text-gray-400 uppercase tracking-wider">Top ROI Lega</p>
+          <p id="stat-top-roi" class="text-2xl sm:text-3xl font-extrabold mt-1 text-emerald-400">0%</p>
+          <p id="stat-top-roi-player" class="text-[10px] sm:text-xs text-gray-500 mt-0.5 truncate">-</p>
         </div>
-        <div class="bg-brand-card border border-brand-border p-5 rounded-2xl">
-          <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Leader Corrente</p>
-          <p id="stat-leader-name" class="text-3xl font-extrabold mt-1 text-blue-400">-</p>
-          <p id="stat-leader-profit" class="text-xs text-emerald-400 mt-1">+€ 0.00 profitto</p>
+        <div class="bg-brand-card border border-brand-border p-3.5 sm:p-5 rounded-2xl">
+          <p class="text-[10px] sm:text-xs font-semibold text-gray-400 uppercase tracking-wider">Leader Corrente</p>
+          <p id="stat-leader-name" class="text-2xl sm:text-3xl font-extrabold mt-1 text-blue-400 truncate">-</p>
+          <p id="stat-leader-profit" class="text-[10px] sm:text-xs text-emerald-400 mt-0.5 truncate">+€ 0.00 profitto</p>
         </div>
       </div>
 
       <!-- CHARTS SECTION -->
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div class="bg-brand-card border border-brand-border p-5 rounded-2xl">
-          <h3 class="text-base font-bold text-white mb-4 flex items-center justify-between">
-            Andamento Profitto nel Tempo (€)
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+        <div class="bg-brand-card border border-brand-border p-4 sm:p-5 rounded-2xl">
+          <h3 class="text-sm sm:text-base font-bold text-white mb-3">
+            Andamento Profitto Netto (€)
           </h3>
-          <div class="h-64">
+          <div class="h-56 sm:h-64 relative">
             <canvas id="chartProfit"></canvas>
           </div>
         </div>
-        <div class="bg-brand-card border border-brand-border p-5 rounded-2xl">
-          <h3 class="text-base font-bold text-white mb-4 flex items-center justify-between">
+        <div class="bg-brand-card border border-brand-border p-4 sm:p-5 rounded-2xl">
+          <h3 class="text-sm sm:text-base font-bold text-white mb-3">
             Confronto ROI (%)
           </h3>
-          <div class="h-64">
+          <div class="h-56 sm:h-64 relative">
             <canvas id="chartRoi"></canvas>
           </div>
         </div>
@@ -130,67 +133,67 @@
     </section>
 
     <!-- TAB 2: PARTITE & TIMER LIVE -->
-    <section id="tab-partite" class="space-y-6 hidden">
+    <section id="tab-partite" class="space-y-4 sm:space-y-6 hidden">
       <!-- LIVE SESSION WIDGET -->
-      <div id="live-session-widget" class="bg-gradient-to-r from-blue-900/30 to-amber-900/30 border border-amber-500/30 p-6 rounded-2xl hidden">
-        <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+      <div id="live-session-widget" class="bg-gradient-to-r from-blue-900/30 to-amber-900/30 border border-amber-500/30 p-4 sm:p-6 rounded-2xl hidden">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
           <div>
-            <span class="bg-red-500/20 text-red-400 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider animate-pulse">Sessione in Corso</span>
-            <h2 class="text-2xl font-bold text-white mt-2">Tavolo Poker Attivo</h2>
-            <p class="text-gray-400 text-sm">Timer avviato. Registra i buy-in e chiudi il tavolo a fine partita.</p>
+            <span class="bg-red-500/20 text-red-400 text-[10px] sm:text-xs font-bold px-2.5 py-1 rounded-full uppercase tracking-wider animate-pulse inline-block">Sessione in Corso</span>
+            <h2 class="text-xl sm:text-2xl font-bold text-white mt-1.5">Tavolo Poker Attivo</h2>
+            <p class="text-gray-400 text-xs sm:text-sm">Timer avviato. Modifica i buy-in e chiudi il tavolo a fine partita.</p>
           </div>
-          <div class="text-center md:text-right">
-            <div id="game-timer" class="text-4xl font-mono font-black text-amber-400 tracking-wider">00:00:00</div>
-            <button onclick="openActiveGameModal()" class="mt-3 bg-emerald-500 hover:bg-emerald-600 text-black font-bold px-5 py-2 rounded-xl text-sm transition">
-              Gestisci e Chiudi Partita
+          <div class="w-full sm:w-auto text-left sm:text-right flex sm:flex-col justify-between sm:justify-center items-center sm:items-end gap-2 border-t sm:border-t-0 border-brand-border/50 pt-3 sm:pt-0">
+            <div id="game-timer" class="text-3xl sm:text-4xl font-mono font-black text-amber-400 tracking-wider">00:00:00</div>
+            <button onclick="openActiveGameModal()" class="bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-black font-bold px-4 py-2 rounded-xl text-xs sm:text-sm transition">
+              Gestisci Tavolo
             </button>
           </div>
         </div>
       </div>
 
       <div class="bg-brand-card border border-brand-border rounded-2xl overflow-hidden">
-        <div class="p-5 border-b border-brand-border flex justify-between items-center">
-          <h3 class="font-bold text-lg text-white">Storico Sessioni</h3>
+        <div class="p-4 sm:p-5 border-b border-brand-border">
+          <h3 class="font-bold text-base sm:text-lg text-white">Storico Sessioni</h3>
         </div>
         <div class="divide-y divide-brand-border" id="games-history-list">
-          <p class="p-6 text-center text-gray-500">Nessuna sessione registrata. Clicca su "Nuova Partita" per iniziare.</p>
+          <p class="p-6 text-center text-gray-500 text-sm">Nessuna sessione registrata. Clicca su "Nuova Partita" per iniziare.</p>
         </div>
       </div>
     </section>
 
     <!-- TAB 3: GIOCATORI E AMICI -->
-    <section id="tab-giocatori" class="space-y-6 hidden">
-      <div class="bg-brand-card border border-brand-border p-6 rounded-2xl">
-        <h3 class="text-lg font-bold text-white mb-4">Aggiungi / Collega un Amico</h3>
-        <form id="form-add-player" onsubmit="handleAddPlayer(event)" class="flex flex-col sm:flex-row gap-3">
-          <input type="text" id="input-player-name" placeholder="Nickname di gioco (es. Patty, Dario)" required class="flex-1 bg-brand-dark border border-brand-border rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-brand-accent">
-          <input type="email" id="input-player-email" placeholder="Email profilo (opzionale)" class="flex-1 bg-brand-dark border border-brand-border rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-brand-accent">
-          <button type="submit" class="bg-brand-accent hover:bg-blue-600 text-white font-bold px-6 py-2.5 rounded-xl transition">Aggiungi</button>
+    <section id="tab-giocatori" class="space-y-4 sm:space-y-6 hidden">
+      <div class="bg-brand-card border border-brand-border p-4 sm:p-6 rounded-2xl">
+        <h3 class="text-base sm:text-lg font-bold text-white mb-3 sm:mb-4">Aggiungi o Collega Amico</h3>
+        <form id="form-add-player" onsubmit="handleAddPlayer(event)" class="flex flex-col sm:flex-row gap-2.5">
+          <input type="text" id="input-player-name" placeholder="Nickname di gioco (es. Patty, Dario)" required class="flex-1 bg-brand-dark border border-brand-border rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-brand-accent">
+          <input type="email" id="input-player-email" placeholder="Email profilo (opzionale)" class="flex-1 bg-brand-dark border border-brand-border rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-brand-accent">
+          <button type="submit" class="bg-brand-accent hover:bg-blue-600 active:scale-95 text-white font-bold px-5 py-2.5 rounded-xl text-sm transition">Aggiungi</button>
         </form>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="players-cards-grid">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4" id="players-cards-grid">
         <!-- Generato dinamicamente -->
       </div>
     </section>
 
     <!-- TAB 4: CLASSIFICA DETTAGLIATA -->
-    <section id="tab-classifica" class="space-y-6 hidden">
+    <section id="tab-classifica" class="space-y-4 sm:space-y-6 hidden">
       <div class="bg-brand-card border border-brand-border rounded-2xl overflow-hidden">
-        <div class="p-5 border-b border-brand-border">
-          <h3 class="font-bold text-lg text-white">Classifica Generale Lega</h3>
+        <div class="p-4 sm:p-5 border-b border-brand-border">
+          <h3 class="font-bold text-base sm:text-lg text-white">Classifica Generale Lega</h3>
         </div>
         <div class="overflow-x-auto">
-          <table class="w-full text-left text-sm">
-            <thead class="bg-brand-dark/50 text-gray-400 uppercase text-xs border-b border-brand-border">
+          <table class="w-full text-left text-xs sm:text-sm min-w-[500px]">
+            <thead class="bg-brand-dark/50 text-gray-400 uppercase text-[10px] sm:text-xs border-b border-brand-border">
               <tr>
-                <th class="p-4">#</th>
-                <th class="p-4">Giocatore</th>
-                <th class="p-4">Partite</th>
-                <th class="p-4">Tot. Buy-in</th>
-                <th class="p-4">Tot. Cash-out</th>
-                <th class="p-4">Profitto Netto</th>
-                <th class="p-4">ROI %</th>
+                <th class="p-3 sm:p-4">#</th>
+                <th class="p-3 sm:p-4">Giocatore</th>
+                <th class="p-3 sm:p-4">Partite</th>
+                <th class="p-3 sm:p-4">Tot. Buy-in</th>
+                <th class="p-3 sm:p-4">Tot. Cash-out</th>
+                <th class="p-3 sm:p-4">Profitto Netto</th>
+                <th class="p-3 sm:p-4">ROI %</th>
               </tr>
             </thead>
             <tbody id="leaderboard-table-body" class="divide-y divide-brand-border">
@@ -203,66 +206,90 @@
 
   </main>
 
+  <!-- BOTTOM NAVIGATION BAR (ESCLUSIVA PER MOBILE SMARTPHONE) -->
+  <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-brand-card/95 border-t border-brand-border z-40 backdrop-blur pb-safe">
+    <div class="grid grid-cols-4 h-14">
+      <button id="mob-btn-dashboard" onclick="switchTab('dashboard')" class="flex flex-col items-center justify-center text-brand-accent transition">
+        <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+        <span class="text-[10px] font-medium mt-1">Home</span>
+      </button>
+      <button id="mob-btn-partite" onclick="switchTab('partite')" class="flex flex-col items-center justify-center text-gray-400 transition">
+        <i data-lucide="dices" class="w-5 h-5"></i>
+        <span class="text-[10px] font-medium mt-1">Partite</span>
+      </button>
+      <button id="mob-btn-giocatori" onclick="switchTab('giocatori')" class="flex flex-col items-center justify-center text-gray-400 transition">
+        <i data-lucide="users" class="w-5 h-5"></i>
+        <span class="text-[10px] font-medium mt-1">Giocatori</span>
+      </button>
+      <button id="mob-btn-classifica" onclick="switchTab('classifica')" class="flex flex-col items-center justify-center text-gray-400 transition">
+        <i data-lucide="trophy" class="w-5 h-5"></i>
+        <span class="text-[10px] font-medium mt-1">Classifica</span>
+      </button>
+    </div>
+  </nav>
+
   <!-- MODAL: NUOVA PARTITA / GESTIONE PARTITA ATTIVA -->
-  <div id="modal-new-game" class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop hidden">
-    <div class="bg-brand-card border border-brand-border rounded-2xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden shadow-2xl">
-      <div class="p-5 border-b border-brand-border flex justify-between items-center">
+  <div id="modal-new-game" class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 modal-backdrop hidden">
+    <div class="bg-brand-card border-t sm:border border-brand-border rounded-t-2xl sm:rounded-2xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden shadow-2xl">
+      
+      <!-- MODAL HEADER -->
+      <div class="p-4 sm:p-5 border-b border-brand-border flex justify-between items-center bg-brand-dark/40">
         <div>
-          <h3 class="text-lg font-bold text-white">Gestione Sessione Poker</h3>
-          <p class="text-xs text-gray-400">Il totale dei Buy-in deve essere UGUALE al totale dei Cash-out.</p>
+          <h3 class="text-base sm:text-lg font-bold text-white">Sessione Poker</h3>
+          <p class="text-[11px] sm:text-xs text-gray-400">Totale Buy-in deve essere UGUALE a totale Cash-out.</p>
         </div>
-        <button onclick="closeModal('modal-new-game')" class="text-gray-400 hover:text-white text-xl font-bold">&times;</button>
+        <button onclick="closeModal('modal-new-game')" class="text-gray-400 hover:text-white p-1 text-2xl font-bold">&times;</button>
       </div>
 
-      <div class="p-6 overflow-y-auto space-y-6 flex-1">
-        <!-- TIMER DASHBOARD IN MODAL -->
-        <div class="bg-brand-dark border border-brand-border p-4 rounded-xl flex items-center justify-between">
+      <!-- MODAL BODY -->
+      <div class="p-4 sm:p-6 overflow-y-auto space-y-4 sm:space-y-6 flex-1">
+        <!-- TIMER WIDGET -->
+        <div class="bg-brand-dark border border-brand-border p-3.5 sm:p-4 rounded-xl flex items-center justify-between">
           <div>
-            <span class="text-xs text-gray-400 uppercase">Tempo Trascorso</span>
-            <div id="modal-timer-display" class="text-2xl font-mono font-bold text-amber-400">00:00:00</div>
+            <span class="text-[10px] sm:text-xs text-gray-400 uppercase tracking-wider block">Tempo di Gioco</span>
+            <div id="modal-timer-display" class="text-2xl sm:text-3xl font-mono font-bold text-amber-400">00:00:00</div>
           </div>
-          <div class="flex gap-2">
-            <button id="btn-timer-start" onclick="toggleTimer()" class="bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-emerald-500/30">
-              Avvia Timer
-            </button>
-          </div>
-        </div>
-
-        <!-- SELEZIONE ED AGGIUNTA GIOCATORI -->
-        <div class="space-y-3">
-          <label class="block text-sm font-semibold text-gray-300">Partecipanti al Tavolo</label>
-          <div id="session-players-container" class="space-y-2">
-            <!-- Righe giocatori caricate dinamicamente -->
-          </div>
-          <button onclick="addPlayerRowToSession()" class="w-full py-2 border border-dashed border-brand-border rounded-xl text-sm font-semibold text-gray-400 hover:text-white hover:border-brand-accent transition flex items-center justify-center gap-2">
-            + Aggiungi Giocatore al Tavolo
+          <button id="btn-timer-start" onclick="toggleTimer()" class="bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-3 py-2 rounded-xl text-xs font-bold active:scale-95 transition">
+            Avvia Timer
           </button>
         </div>
 
-        <!-- VALIDAZIONE SALDI -->
-        <div id="balance-validation-box" class="bg-brand-dark p-4 rounded-xl border border-brand-border space-y-1">
-          <div class="flex justify-between text-sm">
+        <!-- LISTA GIOCATORI TAVOLO -->
+        <div class="space-y-2.5">
+          <label class="block text-xs sm:text-sm font-semibold text-gray-300">Partecipanti al Tavolo</label>
+          <div id="session-players-container" class="space-y-2">
+            <!-- Righe giocatori caricate dinamicamente -->
+          </div>
+          <button onclick="addPlayerRowToSession()" class="w-full py-2.5 border border-dashed border-brand-border rounded-xl text-xs sm:text-sm font-semibold text-gray-400 hover:text-white hover:border-brand-accent transition flex items-center justify-center gap-1.5 active:bg-brand-dark/50">
+            <i data-lucide="user-plus" class="w-4 h-4"></i> Aggiungi Giocatore
+          </button>
+        </div>
+
+        <!-- BOX VALIDAZIONE SALDI -->
+        <div id="balance-validation-box" class="bg-brand-dark p-3.5 sm:p-4 rounded-xl border border-brand-border space-y-1.5">
+          <div class="flex justify-between text-xs sm:text-sm">
             <span class="text-gray-400">Totale Buy-in:</span>
             <span id="val-total-buyin" class="font-bold text-amber-400">€ 0.00</span>
           </div>
-          <div class="flex justify-between text-sm">
+          <div class="flex justify-between text-xs sm:text-sm">
             <span class="text-gray-400">Totale Cash-out:</span>
             <span id="val-total-cashout" class="font-bold text-emerald-400">€ 0.00</span>
           </div>
-          <div class="border-t border-brand-border my-2 pt-2 flex justify-between text-sm font-bold">
+          <div class="border-t border-brand-border my-1.5 pt-2 flex justify-between text-xs sm:text-sm font-bold">
             <span class="text-gray-300">Differenza (Scarto):</span>
             <span id="val-difference" class="text-emerald-400">€ 0.00</span>
           </div>
-          <p id="val-error-msg" class="text-xs text-red-400 font-medium hidden mt-1">
-            ⚠️ Errore: Il totale Buy-in deve essere identico al totale Cash-out prima di chiudere la sessione!
+          <p id="val-error-msg" class="text-[11px] text-red-400 font-medium hidden mt-1">
+            ⚠️ Attenzione: Il totale dei Buy-in deve essere identico al totale dei Cash-out per potersi chiudere!
           </p>
         </div>
       </div>
 
-      <div class="p-5 border-t border-brand-border flex justify-end gap-3 bg-brand-dark/30">
-        <button onclick="closeModal('modal-new-game')" class="px-4 py-2 rounded-xl text-sm font-semibold text-gray-400 hover:text-white">Annulla</button>
-        <button id="btn-close-session" onclick="saveAndCloseSession()" class="bg-amber-500 hover:bg-amber-600 text-black font-bold px-5 py-2 rounded-xl text-sm transition">
-          Salva e Chiudi Sessione
+      <!-- MODAL FOOTER -->
+      <div class="p-3.5 sm:p-4 border-t border-brand-border flex justify-end gap-2.5 bg-brand-dark/50 pb-safe">
+        <button onclick="closeModal('modal-new-game')" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold text-gray-400 hover:text-white">Annulla</button>
+        <button id="btn-close-session" onclick="saveAndCloseSession()" class="bg-amber-500 hover:bg-amber-600 active:scale-95 text-black font-bold px-4 sm:px-5 py-2 rounded-xl text-xs sm:text-sm transition">
+          Salva e Chiudi
         </button>
       </div>
     </div>
@@ -278,10 +305,9 @@
     try {
       if (window.supabase) {
         supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-        console.log("Supabase collegato correttamente.");
       }
     } catch (e) {
-      console.warn("Inizializzazione Supabase fallita, attivo fallback locale:", e);
+      console.warn("Fallback locale attivo:", e);
     }
 
     // --- APPLICATION STATE ---
@@ -316,7 +342,7 @@
           room_code: 'DEFAULT',
           game_data: state
         }).then(({ error }) => {
-          if (error) console.warn("Sync Supabase non riuscito:", error.message);
+          if (error) console.warn("Sync Supabase error:", error.message);
         });
       }
     }
@@ -325,13 +351,23 @@
     function switchTab(tabId) {
       ['dashboard', 'partite', 'giocatori', 'classifica'].forEach(t => {
         document.getElementById(`tab-${t}`).classList.add('hidden');
+        
+        // Desktop Tabs
         const btn = document.getElementById(`tab-btn-${t}`);
-        btn.className = "px-4 py-2 rounded-lg text-sm font-semibold transition text-gray-400 hover:text-white";
+        if (btn) btn.className = "px-4 py-2 rounded-lg text-sm font-semibold transition text-gray-400 hover:text-white";
+
+        // Mobile Bottom Nav Tabs
+        const mobBtn = document.getElementById(`mob-btn-${t}`);
+        if (mobBtn) mobBtn.className = "flex flex-col items-center justify-center text-gray-400 transition";
       });
 
       document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+      
       const activeBtn = document.getElementById(`tab-btn-${tabId}`);
-      activeBtn.className = "px-4 py-2 rounded-lg text-sm font-semibold transition bg-brand-accent text-white";
+      if (activeBtn) activeBtn.className = "px-4 py-2 rounded-lg text-sm font-semibold transition bg-brand-accent text-white";
+
+      const activeMobBtn = document.getElementById(`mob-btn-${tabId}`);
+      if (activeMobBtn) activeMobBtn.className = "flex flex-col items-center justify-center text-brand-accent transition font-bold";
 
       if (tabId === 'dashboard') renderCharts();
     }
@@ -373,12 +409,12 @@
 
       if (state.activeSession.isRunning) {
         btn.textContent = "Pausa Timer";
-        btn.className = "bg-amber-500/20 text-amber-400 border border-amber-500/30 px-3 py-1.5 rounded-lg text-xs font-bold";
+        btn.className = "bg-amber-500/20 text-amber-400 border border-amber-500/30 px-3 py-2 rounded-xl text-xs font-bold";
         startTimerLoop();
         document.getElementById('live-session-widget').classList.remove('hidden');
       } else {
         btn.textContent = "Riprendi Timer";
-        btn.className = "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-3 py-1.5 rounded-lg text-xs font-bold";
+        btn.className = "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-3 py-2 rounded-xl text-xs font-bold";
         clearInterval(timerInterval);
       }
       saveState();
@@ -412,20 +448,24 @@
 
       state.activeSession.players.forEach((p, idx) => {
         const row = document.createElement('div');
-        row.className = "flex items-center gap-2 bg-brand-dark p-2 rounded-xl border border-brand-border";
+        row.className = "grid grid-cols-12 gap-1.5 items-center bg-brand-dark p-2 rounded-xl border border-brand-border";
         row.innerHTML = `
-          <select onchange="updatePlayerSessionName(${idx}, this.value)" class="flex-1 bg-brand-card border border-brand-border rounded-lg px-3 py-1.5 text-sm text-white focus:outline-none">
-            ${state.players.map(name => `<option value="${name}" ${name === p.name ? 'selected' : ''}>${name}</option>`).join('')}
-          </select>
-          <div class="flex items-center gap-1">
-            <span class="text-xs text-gray-500">In: €</span>
-            <input type="number" min="0" step="1" value="${p.buyIn}" onchange="updatePlayerSessionValue(${idx}, 'buyIn', this.value)" class="w-20 bg-brand-card border border-brand-border rounded-lg px-2 py-1 text-sm font-bold text-amber-400 text-center">
+          <div class="col-span-5 sm:col-span-5">
+            <select onchange="updatePlayerSessionName(${idx}, this.value)" class="w-full bg-brand-card border border-brand-border rounded-lg px-2 py-1.5 text-xs sm:text-sm text-white focus:outline-none">
+              ${state.players.map(name => `<option value="${name}" ${name === p.name ? 'selected' : ''}>${name}</option>`).join('')}
+            </select>
           </div>
-          <div class="flex items-center gap-1">
-            <span class="text-xs text-gray-500">Out: €</span>
-            <input type="number" min="0" step="1" value="${p.cashOut}" onchange="updatePlayerSessionValue(${idx}, 'cashOut', this.value)" class="w-20 bg-brand-card border border-brand-border rounded-lg px-2 py-1 text-sm font-bold text-emerald-400 text-center">
+          <div class="col-span-3 sm:col-span-3 flex items-center gap-1">
+            <span class="text-[10px] text-gray-500">In:</span>
+            <input type="number" min="0" step="1" value="${p.buyIn}" onchange="updatePlayerSessionValue(${idx}, 'buyIn', this.value)" class="w-full bg-brand-card border border-brand-border rounded-lg px-1.5 py-1 text-xs sm:text-sm font-bold text-amber-400 text-center">
           </div>
-          <button onclick="removePlayerFromSession(${idx})" class="text-red-400 hover:text-red-300 px-2 font-bold">&times;</button>
+          <div class="col-span-3 sm:col-span-3 flex items-center gap-1">
+            <span class="text-[10px] text-gray-500">Out:</span>
+            <input type="number" min="0" step="1" value="${p.cashOut}" onchange="updatePlayerSessionValue(${idx}, 'cashOut', this.value)" class="w-full bg-brand-card border border-brand-border rounded-lg px-1.5 py-1 text-xs sm:text-sm font-bold text-emerald-400 text-center">
+          </div>
+          <div class="col-span-1 text-center">
+            <button onclick="removePlayerFromSession(${idx})" class="text-red-400 hover:text-red-300 font-bold p-1 text-base">&times;</button>
+          </div>
         `;
         container.appendChild(row);
       });
@@ -440,7 +480,7 @@
 
     function removePlayerFromSession(idx) {
       if (state.activeSession.players.length <= 2) {
-        alert("Una partita deve avere almeno 2 giocatori.");
+        alert("La partita richiede almeno 2 giocatori.");
         return;
       }
       state.activeSession.players.splice(idx, 1);
@@ -598,14 +638,14 @@
       }
       if (leaderProfitVal !== -Infinity) {
         document.getElementById('stat-leader-name').textContent = leaderPlayer;
-        document.getElementById('stat-leader-profit').textContent = `${leaderProfitVal >= 0 ? '+' : ''}€ ${leaderProfitVal.toFixed(2)} profitto`;
+        document.getElementById('stat-leader-profit').textContent = `${leaderProfitVal >= 0 ? '+' : ''}€ ${leaderProfitVal.toFixed(2)}`;
       }
     }
 
     function renderGamesHistory() {
       const list = document.getElementById('games-history-list');
       if (state.games.length === 0) {
-        list.innerHTML = '<p class="p-6 text-center text-gray-500">Nessuna sessione registrata.</p>';
+        list.innerHTML = '<p class="p-6 text-center text-gray-500 text-sm">Nessuna sessione registrata.</p>';
         return;
       }
 
@@ -615,23 +655,23 @@
         const durationStr = `${hrs > 0 ? hrs + 'h ' : ''}${mins}m`;
 
         return `
-          <div class="p-5 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <div class="p-4 sm:p-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
             <div>
               <div class="flex items-center gap-2">
-                <span class="font-bold text-white">${g.date}</span>
-                <span class="text-xs bg-brand-dark px-2.5 py-1 rounded-full text-gray-400 border border-brand-border">Durata: ${durationStr}</span>
+                <span class="font-bold text-white text-sm sm:text-base">${g.date}</span>
+                <span class="text-[10px] bg-brand-dark px-2 py-0.5 rounded-full text-gray-400 border border-brand-border">Durata: ${durationStr}</span>
               </div>
-              <div class="mt-2 flex flex-wrap gap-2">
+              <div class="mt-2 flex flex-wrap gap-1.5">
                 ${g.players.map(p => `
-                  <span class="text-xs px-2.5 py-1 rounded-lg ${p.profit >= 0 ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'} font-medium">
+                  <span class="text-xs px-2 py-1 rounded-lg ${p.profit >= 0 ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'} font-medium">
                     ${p.name}: ${p.profit >= 0 ? '+' : ''}€${p.profit.toFixed(2)}
                   </span>
                 `).join('')}
               </div>
             </div>
-            <div class="text-right">
-              <span class="text-xs text-gray-400 uppercase">Montepremi</span>
-              <div class="font-black text-amber-400 text-lg">€ ${g.totalPrize.toFixed(2)}</div>
+            <div class="text-left sm:text-right border-t sm:border-t-0 border-brand-border/50 pt-2 sm:pt-0 w-full sm:w-auto flex justify-between sm:block">
+              <span class="text-[10px] text-gray-400 uppercase tracking-wider block">Montepremi</span>
+              <div class="font-black text-amber-400 text-base sm:text-lg">€ ${g.totalPrize.toFixed(2)}</div>
             </div>
           </div>
         `;
@@ -645,16 +685,16 @@
       grid.innerHTML = state.players.map(p => {
         const s = stats[p] || { games: 0, profit: 0, roi: 0 };
         return `
-          <div class="bg-brand-card border border-brand-border p-5 rounded-2xl flex justify-between items-center">
+          <div class="bg-brand-card border border-brand-border p-4 rounded-2xl flex justify-between items-center">
             <div>
-              <h4 class="font-bold text-lg text-white">${p}</h4>
-              <p class="text-xs text-gray-400">${s.games} sessioni giocate</p>
+              <h4 class="font-bold text-base text-white">${p}</h4>
+              <p class="text-xs text-gray-400">${s.games} sessioni</p>
             </div>
             <div class="text-right">
-              <div class="font-extrabold ${s.profit >= 0 ? 'text-emerald-400' : 'text-red-400'}">
+              <div class="font-extrabold text-sm sm:text-base ${s.profit >= 0 ? 'text-emerald-400' : 'text-red-400'}">
                 ${s.profit >= 0 ? '+' : ''}€ ${s.profit.toFixed(2)}
               </div>
-              <p class="text-xs text-gray-500">ROI: ${s.roi.toFixed(1)}%</p>
+              <p class="text-[10px] sm:text-xs text-gray-500">ROI: ${s.roi.toFixed(1)}%</p>
             </div>
           </div>
         `;
@@ -669,15 +709,15 @@
 
       tbody.innerHTML = sorted.map(([player, s], idx) => `
         <tr class="hover:bg-brand-dark/30 transition">
-          <td class="p-4 font-bold ${idx === 0 ? 'text-amber-400' : 'text-gray-400'}">${idx + 1}</td>
-          <td class="p-4 font-semibold text-white">${player}</td>
-          <td class="p-4 text-gray-300">${s.games}</td>
-          <td class="p-4 text-gray-400">€ ${s.buyIn.toFixed(2)}</td>
-          <td class="p-4 text-gray-400">€ ${s.cashOut.toFixed(2)}</td>
-          <td class="p-4 font-bold ${s.profit >= 0 ? 'text-emerald-400' : 'text-red-400'}">
+          <td class="p-3 sm:p-4 font-bold ${idx === 0 ? 'text-amber-400' : 'text-gray-400'}">${idx + 1}</td>
+          <td class="p-3 sm:p-4 font-semibold text-white">${player}</td>
+          <td class="p-3 sm:p-4 text-gray-300">${s.games}</td>
+          <td class="p-3 sm:p-4 text-gray-400">€ ${s.buyIn.toFixed(2)}</td>
+          <td class="p-3 sm:p-4 text-gray-400">€ ${s.cashOut.toFixed(2)}</td>
+          <td class="p-3 sm:p-4 font-bold ${s.profit >= 0 ? 'text-emerald-400' : 'text-red-400'}">
             ${s.profit >= 0 ? '+' : ''}€ ${s.profit.toFixed(2)}
           </td>
-          <td class="p-4 font-semibold ${s.roi >= 0 ? 'text-emerald-400' : 'text-red-400'}">
+          <td class="p-3 sm:p-4 font-semibold ${s.roi >= 0 ? 'text-emerald-400' : 'text-red-400'}">
             ${s.roi.toFixed(1)}%
           </td>
         </tr>
@@ -701,7 +741,7 @@
             label: 'Profitto Netto (€)',
             data: profitData,
             backgroundColor: profitData.map(v => v >= 0 ? '#10B981' : '#EF4444'),
-            borderRadius: 8
+            borderRadius: 6
           }]
         },
         options: {
@@ -709,8 +749,8 @@
           maintainAspectRatio: false,
           plugins: { legend: { display: false } },
           scales: {
-            y: { ticks: { color: '#9CA3AF' }, grid: { color: '#1F2937' } },
-            x: { ticks: { color: '#9CA3AF' }, grid: { display: false } }
+            y: { ticks: { color: '#9CA3AF', font: { size: 10 } }, grid: { color: '#1F2937' } },
+            x: { ticks: { color: '#9CA3AF', font: { size: 10 } }, grid: { display: false } }
           }
         }
       });
@@ -726,7 +766,7 @@
             label: 'ROI (%)',
             data: roiData,
             backgroundColor: '#3B82F6',
-            borderRadius: 8
+            borderRadius: 6
           }]
         },
         options: {
@@ -734,8 +774,8 @@
           maintainAspectRatio: false,
           plugins: { legend: { display: false } },
           scales: {
-            y: { ticks: { color: '#9CA3AF' }, grid: { color: '#1F2937' } },
-            x: { ticks: { color: '#9CA3AF' }, grid: { display: false } }
+            y: { ticks: { color: '#9CA3AF', font: { size: 10 } }, grid: { color: '#1F2937' } },
+            x: { ticks: { color: '#9CA3AF', font: { size: 10 } }, grid: { display: false } }
           }
         }
       });
